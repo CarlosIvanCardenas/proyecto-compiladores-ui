@@ -1,0 +1,54 @@
+program fun_declaration_and_call
+
+var int_variable: int
+var float_variable: float
+var char_variable: char
+
+fun void_function(): void {
+    var tmp: int
+    tmp = 5
+}
+
+fun int_function(): int {
+    var tmp: int
+    tmp = 5
+    return (5)
+}
+
+fun float_function(): float {
+    var tmp: float
+    tmp = 2.5
+    return (2.5)
+}
+
+fun char_function(): char {
+    var tmp: char
+    tmp = 'a'
+    return (tmp)
+}
+
+fun sum(a: int, b: int): int {
+    return (a + b)
+}
+
+main() {
+    # Test return values for all data types.
+    int_variable = int_function()
+    float_variable = float_function()
+    char_variable = char_function()
+
+    # Print values.
+    write(int_variable)
+    write(float_variable)
+    write(char_variable)
+
+    # Test void function.
+    void_function()
+
+    # Test function with parameters.
+    int_variable = sum(2, 4)
+    write(int_variable)
+
+    int_variable = sum(2*5, 5+5)
+    write(int_variable)
+}
