@@ -1,0 +1,34 @@
+{
+  "name": "proyecto-compiladores-ui",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Dale++ UI",
+  "devDependencies": {
+    "electron": "^10.1.5",
+    "electron-builder": "^22.9.1"
+  },
+  "build": {
+    "appId": "com.electron.app",
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "unicode": false,
+      "artifactName": "dale++.exe"
+    },
+    "extraResources": "core"
+  },
+  "dependencies": {
+    "@blockly/plugin-modal": "^2.1.6",
+    "blockly": "^3.20200924.4",
+    "builder-util": "^22.9.1"
+  }
+}

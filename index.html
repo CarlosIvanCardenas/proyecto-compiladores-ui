@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+    <script src="https://unpkg.com/@blockly/plugin-typed-variable-modal"></script>
+    <script src="custom-dialog.js"></script>
+    <script src="custom_blocks.js"></script>
+    <script src="custom_generator.js"></script>
+    <style>
+        .row {
+            display: flex;
+        }
+
+        .fixed {
+            width: 800px;
+        }
+
+        .flex-item {
+            flex-grow: 1;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="row">
+        <div class="fixed">
+            <h1>Dale++</h1>
+        </div>
+        <div class="flex-item">
+            <button onclick="runPythonScripts()">Run</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="fixed" id="blocklyDiv" style="height: 560px; width: 800px;"></div>
+        <div class="flex-item">
+            <textarea id="textarea" readonly placeholder="The generated code will be displayed here."></textarea>
+        </div>
+    </div>
+</div>
+<xml id="toolbox" style="display: none">
+    <category name="Inputs" colour="20">
+        <block type="math_number"></block>
+        <block type="text"></block>
+        <block type="write"></block>
+        <block type="read"></block>
+    </category>
+    <sep></sep>
+    <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="CREATE_TYPED_VARIABLE"></category>
+    <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"></category>
+    <sep></sep>
+    <category name="Arithmetic" colour="%{BKY_MATH_HUE}">
+        <block type="arithmetic_operation">
+            <value name="LEFT_OPERAND">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+            </value>
+            <value name="RIGHT_OPERAND">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+            </value>
+        </block>
+    </category>
+    <sep></sep>
+    <category name="Boolean" colour="%{BKY_LOGIC_HUE}">
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+    </category>
+    <category name="Conditionals" colour="%{BKY_LOGIC_HUE}">
+        <block type="controls_if">
+            <value name="IF0">
+                <block type="logic_compare">
+                </block>
+            </value>
+        </block>
+        <block type="controls_if">
+            <value name="IF0">
+                <block type="logic_compare">
+                </block>
+            </value>
+            <mutation else="1"></mutation>
+        </block>
+    </category>
+    <sep></sep>
+    <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+        <block type="for_loop">
+            <value name="FROM">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+            </value>
+            <value name="TO">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+            </value>
+        </block>
+        <block type="while_loop">
+            <value name="BOOL">
+                <block type="logic_compare">
+                </block>
+            </value>
+        </block>
+    </category>
+    <sep></sep>
+    <category name="Program" colour="260">
+        <block type="program">
+            <value name="ID">
+                <block type="text">
+                    <field name="TEXT">my_program</field>
+                </block>
+            </value>
+        </block>
+        <block type="main"></block>
+    </category>
+</xml>
+<script>
+  const {ipcRenderer} = require('electron')
+
+  let workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox')});
+
+  workspace.registerToolboxCategoryCallback('CREATE_TYPED_VARIABLE', createFlyout);
+  const typedVarModal = new TypedVariableModal(workspace, 'callbackName',
+    [["int", "int"], ["float", "float"], ["char", "char"],
+      ["array-int", "array-int"], ["array-float", "array-float"], ["array-char", "array-char"],
+      ["matrix-int", "matrix-int"], ["matrix-float", "matrix-float"], ["matrix-char", "matrix-char"]]);
+  typedVarModal.init();
+
+  function myUpdateFunction(event) {
+    let code = customGenerator.workspaceToCode(workspace);
+    document.getElementById('textarea').value = code;
+  }
+
+  workspace.addChangeListener(myUpdateFunction);
+
+  // Set listener for compiler output
+  ipcRenderer.on('asynchronous-reply', (event, arg) => {
+    alert(arg);
+  });
+
+  // Run compiler
+  function runPythonScripts() {
+    let code = customGenerator.workspaceToCode(workspace);
+    if (code.toString() === "") {
+      alert("Drag blocks from the toolbox to generate code.")
+    } else {
+      ipcRenderer.send('asynchronous-message', code);
+    }
+  }
+</script>
+</body>
+</html>
