@@ -32,7 +32,7 @@ app.on('activate', () => {
 
 ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg)
-  let python = spawn('python', [path.join(app.getAppPath(), '..', 'core/test.py'), arg])
+  let python = spawn('python', [path.join(app.getAppPath(), '..', 'core/main.py'), arg])
   python.stdout.on('data', function(data) {
     event.reply('asynchronous-reply', data.toString())
   })
