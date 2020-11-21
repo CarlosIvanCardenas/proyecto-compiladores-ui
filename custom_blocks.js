@@ -450,6 +450,7 @@ Blockly.Blocks['procedures_mutatorarg'].validator_ = function (varName) {
   }
   let type = sourceBlock.getFieldValue('TYPE');
   let model = outerWs.getVariable(varName, type);
+  console.log(model)
   if (model && model.name !== varName) {
     // Rename the variable (case change)
     outerWs.renameVariableById(model.getId(), varName);

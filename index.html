@@ -23,7 +23,7 @@
             flex-grow: 1;
         }
 
-        .run-button {
+        .my-button {
             background-color: #4CAF50;
             border: none;
             color: white;
@@ -49,7 +49,9 @@
             <h1>Dale++</h1>
         </div>
         <div class="flex-item">
-            <button class="run-button" onclick="runPythonScripts()">Run</button>
+            <button class="my-button" onclick="runPythonScripts()" style="background-color: #4CAF50;">Run</button>
+            <button class="my-button" onclick="saveWorkspace()">Save</button>
+            <button class="my-button" onclick="loadWorkspace()">Load</button>
         </div>
     </div>
     <div class="row">
@@ -133,6 +135,8 @@
 </xml>
 <script>
   const {ipcRenderer} = require('electron')
+  const { dialog } = require('electron').remote
+  const fs = require('fs')
 
   let workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox')});
 
@@ -158,8 +162,7 @@
   // Set listener for compiler needs input
   ipcRenderer.on('input', (event, arg) => {
     Blockly.prompt(arg, '', (e) => {
-      console.log(e);
-      if (e !== null) {
+      if (e === null) {
         e = '';
       }
       ipcRenderer.send('input-value', e);
@@ -174,6 +177,50 @@
     } else {
       ipcRenderer.send('execute', code);
     }
+  }
+  
+  function saveWorkspace() {
+    let xml = Blockly.Xml.workspaceToDom(workspace);
+    let xmlString = Blockly.Xml.domToText(xml);
+    dialog.showSaveDialog(null,{filters: [{name: 'txt', extensions: ['txt']}]}).then(obj => {
+      const fileName = obj.filePath
+      const canceled = obj.canceled
+      if (canceled){
+        console.log("You didn't save the file");
+        return;
+      }
+
+      // fileName is a string that contains the path and filename created in the save file dialog.
+      fs.writeFile(fileName, xmlString, (err) => {
+        if(err){
+          Blockly.alert("An error ocurred creating the file "+ err.message)
+        }
+        Blockly.alert("The file has been succesfully saved");
+      });
+    });
+  }
+
+  function loadWorkspace() {
+    dialog.showOpenDialog(null,{filters: [{name: 'txt', extensions: ['txt']}]}).then(obj => {
+      const filePaths = obj.filePaths
+      const canceled = obj.canceled
+      // fileNames is an array that contains all the selected
+      if(canceled){
+        console.log("No file selected");
+        return;
+      }
+
+      fs.readFile(filePaths[0], 'utf-8', (err, data) => {
+        if(err){
+          Blockly.alert("An error ocurred reading the file :" + err.message);
+          return;
+        }
+
+        workspace.clear()
+        let xml = Blockly.Xml.textToDom(data);
+        Blockly.Xml.domToWorkspace(xml,workspace);
+      });
+    });
   }
 </script>
 </body>
