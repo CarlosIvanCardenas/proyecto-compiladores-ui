@@ -1,5 +1,4 @@
-from sly import Lexer as SlyLexer
-
+from sly.lex import Lexer as SlyLexer
 
 class CompLexer(SlyLexer):
     # Set of token names

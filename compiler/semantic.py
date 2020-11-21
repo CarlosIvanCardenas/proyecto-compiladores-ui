@@ -169,6 +169,25 @@ class SemanticActions:
 
         return addr
 
+    def add_pointer(self, var_name, var_type):
+        """
+        Añade pointer a la tabla actual de variables
+
+        :param var_name: Nombre de la variable temporal a declarar
+        :param var_type: Tipo de dato de la variable temporal
+        :return: Dirección asignada a la nueva variable temporal
+        """
+        addr = self.v_memory_manager.pointer_addr.allocate_addr(var_type)
+
+        self.current_var_table[var_name] = VarTableItem(
+            name=var_name,
+            type=VarType(var_type),
+            dims=(0, 0),
+            size=1,
+            address=addr)
+
+        return addr
+
     def get_const(self, const_value, const_type):
         """
         Busca constante en tabla de constantes y si no existe la registra
@@ -554,14 +573,14 @@ class SemanticActions:
                         self.quad_list.append(
                             Quadruple(Operator.VERIFY, dim_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[0], VarType.INT)))
-                        temp_id = "_temp_" + str(self.temp_vars_index)
-                        temp_addr = self.add_temp(temp_id, VarType.INT)
+                        # pointer_id tiene la direccion del arreglo indexado
+                        pointer_id = "_pointer_" + str(self.temp_vars_index)
+                        pointer_addr = self.add_pointer(pointer_id, var.type)
                         self.temp_vars_index += 1
                         self.quad_list.append(
                             Quadruple(Operator.PLUS, dim_var.address, self.get_const(var.address, VarType.INT),
-                                      temp_addr))
-                        # TODO: temp_id tiene la direccion del arreglo indexado
-                        self.operands_stack.append(temp_id)
+                                      pointer_addr))
+                        self.operands_stack.append(pointer_id)
                     else:
                         raise Exception("Index type error")
                 else:
@@ -594,12 +613,12 @@ class SemanticActions:
                         self.quad_list.append(
                             Quadruple(Operator.VERIFY, dim2_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[1], VarType.INT)))
-                        temp3_id = "_temp_" + str(self.temp_vars_index)
-                        temp3_addr = self.add_temp(temp_id, VarType.INT)
+                        # pointer_id tiene la direccion del arreglo indexado
+                        pointer_id = "_pointer_" + str(self.temp_vars_index)
+                        pointer_addr = self.add_pointer(temp_id, var.type)
                         self.temp_vars_index += 1
-                        self.quad_list.append(Quadruple(Operator.PLUS, temp2_addr, dim2_var.address, temp3_addr))
-                        # TODO: temp_id tiene la direccion del arreglo indexado
-                        self.operands_stack.append(temp3_addr)
+                        self.quad_list.append(Quadruple(Operator.PLUS, temp2_addr, dim2_var.address, pointer_addr))
+                        self.operands_stack.append(pointer_id)
                     else:
                         raise Exception("Index type error")
                 else:
