@@ -1,5 +1,6 @@
 from compiler.symbol_table import VarType
-from common.scope_size import GLOBAL_ADDRESS_RANGE, LOCAL_ADDRESS_RANGE, CONST_ADDRESS_RANGE, TEMP_ADDRESS_RANGE
+from common.scope_size import GLOBAL_ADDRESS_RANGE, LOCAL_ADDRESS_RANGE, CONST_ADDRESS_RANGE, TEMP_ADDRESS_RANGE, \
+    POINTER_ADDRESS_RANGE
 
 
 class AddressBlock:
@@ -77,6 +78,7 @@ class AddressBlock:
         bool_size = self.bool_addr_idx - self.bool_addr
         return [int_size, float_size, char_size, bool_size]
 
+
 class VirtualMemoryManager:
     """
     Clase encargada de administrar las direcciones virtuales de memoria particionadas por scope.
@@ -87,6 +89,7 @@ class VirtualMemoryManager:
         const_addr:     Bloque de direcciones para constantes.
         temp_addr:      Bloque de direcciones temporales.
     """
+
     def __init__(self):
         self.global_addr = AddressBlock(GLOBAL_ADDRESS_RANGE[0], GLOBAL_ADDRESS_RANGE[1])
         self.local_addr = AddressBlock(LOCAL_ADDRESS_RANGE[0], LOCAL_ADDRESS_RANGE[1])

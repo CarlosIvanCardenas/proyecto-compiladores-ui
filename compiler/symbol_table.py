@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
+
 class VarType(Enum):
     """
     Tipos de dato disponibles para una variable.
@@ -9,6 +10,7 @@ class VarType(Enum):
     FLOAT = 'float'
     CHAR = 'char'
     BOOL = 'bool'
+
 
 class ReturnType(Enum):
     """
@@ -19,6 +21,7 @@ class ReturnType(Enum):
     FLOAT = 'float'
     CHAR = 'char'
 
+
 class ConstType(Enum):
     """
     Tipos de dato disponibles para una constante (ej: 4, 1.2, "Test", 'a').
@@ -27,6 +30,7 @@ class ConstType(Enum):
     float = float
     string = str
     char = str
+
 
 @dataclass
 class FunctionsDirectoryItem:
@@ -40,6 +44,7 @@ class FunctionsDirectoryItem:
     start_addr: int = None
     partition_sizes: [int, int, int, int] = None
 
+
 @dataclass
 class VarTableItem:
     """
@@ -50,5 +55,4 @@ class VarTableItem:
     type: VarType
     size: int
     address: int
-    value: ConstType = None
     dims: (int, int) = (None, None)

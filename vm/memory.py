@@ -17,16 +17,13 @@ class AddressBlock:
     """
     def __init__(self, start_addr, end_addr, int_size=None, float_size=None, char_size=None, bool_size=None):
         self.start_addr = start_addr
-        default_size = (end_addr - start_addr + 1) // 4
+        self.default_size = (end_addr - start_addr + 1) // 4
 
-        if int_size is None:
-            self.int_size = default_size
-        if float_size is None:
-            self.float_size = default_size
-        if char_size is None:
-            self.char_size = default_size
-        if bool_size is None:
-            self.bool_size = default_size
+        # TODO: Revisar tamaño variable
+        self.int_size = self.default_size if int_size is None else int_size
+        self.float_size = self.default_size if float_size is None else float_size
+        self.char_size = self.default_size if char_size is None else char_size
+        self.bool_size = self.default_size if bool_size is None else bool_size
 
         self.int_addr_block = [None] * self.int_size
         self.float_addr_block = [None] * self.float_size
@@ -42,17 +39,16 @@ class AddressBlock:
         """
         # Convertir addr a una dirección de memoria relativa a la instancia actual de AddressBlock.
         rel_addr = addr - self.start_addr
-        if 0 <= rel_addr < self.int_size:
+        if 0 <= rel_addr < self.default_size:
             return VarType.INT
-        elif self.int_size <= rel_addr < (self.int_size + self.float_size):
+        elif self.default_size <= rel_addr < self.default_size*2:
             return VarType.FLOAT
-        elif (self.int_size + self.float_size) <= rel_addr < (self.int_size + self.float_size + self.char_size):
+        elif self.default_size*2 <= rel_addr < self.default_size*3:
             return VarType.CHAR
-        elif (self.int_size + self.float_size + self.char_size) <= rel_addr < (self.int_size + self.float_size +
-                                                                               self.char_size + self.bool_size):
+        elif self.default_size*3 <= rel_addr < self.default_size*4:
             return VarType.BOOL
         else:
-            raise MemoryError('Address out of bounds')
+            raise MemoryError(f'Address: {addr} out of bounds')
 
     def get_address(self, addr, partition):
         """
@@ -66,11 +62,11 @@ class AddressBlock:
         if partition == VarType.INT:
             return int(rel_addr)
         elif partition == VarType.FLOAT:
-            return int(rel_addr - self.int_size)
+            return int(rel_addr - self.default_size)
         elif partition == VarType.CHAR:
-            return int(rel_addr - (self.int_size + self.float_size))
+            return int(rel_addr - self.default_size*2)
         elif partition == VarType.BOOL:
-            return int(rel_addr - (self.int_size + self.float_size + self.char_size))
+            return int(rel_addr - self.default_size*3)
 
     def write(self, addr, value):
         """

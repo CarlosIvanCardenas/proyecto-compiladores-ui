@@ -12,13 +12,13 @@ fun void_function(): void {
 fun int_function(): int {
     var tmp: int
     tmp = 5
-    return (5)
+    return (tmp)
 }
 
 fun float_function(): float {
     var tmp: float
     tmp = 2.5
-    return (2.5)
+    return (tmp)
 }
 
 fun char_function(): char {
