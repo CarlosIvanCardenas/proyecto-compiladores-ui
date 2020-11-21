@@ -30,21 +30,19 @@ app.on('activate', () => {
   }
 })
 
+let python
+
 ipcMain.on('execute', (event, arg) => {
-  let python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
+  python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
+  python.stdin.setEncoding('utf-8');
   python.stdout.on('data', function(data) {
     console.log(data.toString())
-    if (data.toString().indexOf("READ")) {
+    if (data.toString().indexOf("READ") !== -1) {
       event.reply('input', data.toString())
-      ipcMain.on('input-value', (event, arg) => {
-        python.stdin.write(arg.toString())
-        python.stdin.end()
-      })
     } else {
       event.reply('output', data.toString())
     }
   })
-  python.stdin.setEncoding('utf-8');
   python.stderr.on('data', function(err) {
     console.log(err.toString())
     let errorIndex = err.toString().indexOf("Exception:")
@@ -60,4 +58,8 @@ ipcMain.on('execute', (event, arg) => {
   python.on('close', function (code) {
     console.log('child process exited with code ' + code)
   })
+})
+
+ipcMain.on('input-value', (event, arg) => {
+  python.stdin.write(arg.toString()+'\n')
 })
