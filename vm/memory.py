@@ -1,6 +1,5 @@
 from compiler.symbol_table import VarType
 
-
 class AddressBlock:
     """
     Clase que representa un bloque de direcciones de memoria, particionado en los 4 tipos de dato disponibles

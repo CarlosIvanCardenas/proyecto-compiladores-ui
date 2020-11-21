@@ -1,0 +1,11 @@
+program my_program
+
+fun sum(x:int, y:int) : int {
+  return (x + y)
+}
+
+main () {
+  var suma : int
+  suma = sum(10, 5)
+  write(suma)
+}

@@ -28,7 +28,7 @@ class Operator(Enum):
     ENDFUN = 'endfun'
     ERA = 'era'
     VERIFY = 'verify'
-    # TODO: Agregar los que faltan
+    ASSIGNPTR = 'ASSIGNPTR'
 
 @dataclass
 class Quadruple:
