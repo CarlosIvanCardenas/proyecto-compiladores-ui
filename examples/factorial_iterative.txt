@@ -1,0 +1,24 @@
+program factorial_iterative
+
+fun factorial(n: int): int {
+    var val: int
+    var i: int
+        val = 1
+    for i = 1 to n+1 {
+        val = val * i
+    }
+    return (val)
+}
+
+main() {
+    var n: int
+    var f: int
+    write("Escribe valor de n: ")
+    read(n)
+    if (n < 0) {
+        write("Incorrect input")
+    } else {
+        f = factorial(n)
+        write(f)
+    }
+}

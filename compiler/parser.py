@@ -207,7 +207,7 @@ class CompParser(SlyParser):
         pass
 
     # ARGUMENTOS DE LLAMADA A FUNCIÓN
-    @_('"(" args ")"')
+    @_('add_fondo_arg_list args remove_fondo_arg_list')
     def arg_list(self, p):
         if DEBUG_PARSER:
             print('Regla: arg_list')
@@ -219,17 +219,10 @@ class CompParser(SlyParser):
             print('Regla: arg_list empty')
         return []
 
-    @_('exp args_aux')
+    @_('add_fondo_arg exp remove_fondo_arg args_aux')
     def args(self, p):
         if DEBUG_PARSER:
             print('Regla: arg exp')
-        p.args_aux.append((self.semantics.operands_stack.pop()))
-        return p.args_aux
-    
-    @_('call_fun_no_void args_aux')
-    def args(self, p):
-        if DEBUG_PARSER:
-            print('Regla: arg call_fun')
         p.args_aux.append((self.semantics.operands_stack.pop()))
         return p.args_aux
 
@@ -245,15 +238,43 @@ class CompParser(SlyParser):
             print('Regla: arg_aux empty')
         return []
 
+    @_('"("')
+    def add_fondo_arg_list(self, _):
+        self.semantics.operators_stack.append('(')
+        if DEBUG_PARSER:
+            print('Regla: add_fondo arg list')
+        pass
+
+    @_('")"')
+    def remove_fondo_arg_list(self, _):
+        self.semantics.operators_stack.pop()
+        if DEBUG_PARSER:
+            print('Regla: add_fondo arg list')
+        pass
+
+    @_('empty')
+    def add_fondo_arg(self, _):
+        self.semantics.operators_stack.append('(')
+        if DEBUG_PARSER:
+            print('Regla: add_fondo arg')
+        pass
+
+    @_('empty')
+    def remove_fondo_arg(self, _):
+        self.semantics.operators_stack.pop()
+        if DEBUG_PARSER:
+            print('Regla: add_fondo arg')
+        pass
+
     # ASIGNACIÓN
-    @_('ID ASSIGN expresion', 'ID ASSIGN call_fun_no_void')
+    @_('ID ASSIGN expresion')
     def asignacion(self, p):
         if DEBUG_PARSER:
             print('Regla: asignacion')
         self.semantics.generate_quad_assign(name_var=p.ID)
         pass
 
-    @_('array_usage ASSIGN expresion', 'array_usage ASSIGN call_fun_no_void')
+    @_('array_usage ASSIGN expresion')
     def asignacion(self, p):
         if DEBUG_PARSER:
             print('Regla: asignacion')
@@ -481,7 +502,13 @@ class CompParser(SlyParser):
     @_('constante')
     def factor(self, _):
         if DEBUG_PARSER:
-            print('Regla: factor')
+            print('Regla: factor constante')
+        pass
+
+    @_('call_fun_no_void')
+    def factor(self, _):
+        if DEBUG_PARSER:
+            print('Regla: factor call_fun_no_void')
         pass
 
     # CONSTANTE

@@ -1,11 +1,11 @@
-program fibonacci_recursive
+program factorial_recursive
 
-fun fibonacci(n: int): int {
+fun factorial(n: int): int {
     var val: int
-    if ( n == 0 || n == 1) {
-        val = n
+    if ( n == 0) {
+        val = 1
     } else {
-        val = fibonacci(n-1) + fibonacci(n-2)
+        val = n * factorial(n-1)
     }
     return (val)
 }
@@ -18,7 +18,7 @@ main() {
     if (n < 0) {
         write("Incorrect input")
     } else {
-        f = fibonacci(n)
+        f = factorial(n)
         write(f)
     }
 }

@@ -112,7 +112,8 @@ class SemanticActions:
         """
         # Save partition sizes for ERA instruction.
         fun = self.get_fun(self.current_scope)
-        fun.partition_sizes = self.v_memory_manager.local_addr.get_partition_sizes()
+        fun.local_partition_sizes = self.v_memory_manager.local_addr.get_partition_sizes()
+        fun.temp_partition_sizes = self.v_memory_manager.temp_addr.get_partition_sizes()
         self.quad_list.append(Quadruple(Operator.ENDFUN, None, None, None))
         self.set_global_scope()
 
@@ -425,7 +426,7 @@ class SemanticActions:
             if exp.type == VarType.INT or exp.type == VarType.FLOAT:
                 control = self.get_var(self.operands_stack.pop())
                 tipo_res = self.semantic_cube.type_match(control.type, exp.type, Operator.ASSIGN)
-                if tipo_res == 'int' or tipo_res == 'float':
+                if tipo_res == VarType.INT or tipo_res == VarType.FLOAT:
                     self.quad_list.append(Quadruple(Operator.ASSIGN, exp.address, None, control.address))
                     self.operands_stack.append(control.name)
                 else:
@@ -470,7 +471,7 @@ class SemanticActions:
             control = self.get_var(self.operands_stack.pop())
             temp = "_temp_" + str(self.temp_vars_index)  # Pedir dirección de memoria para el resultado
             self.temp_vars_index += 1
-            tipo_res = self.semantic_cube.type_match(control.type, 'int', '+')
+            tipo_res = self.semantic_cube.type_match(control.type, VarType.INT, Operator.PLUS)
             temp_address = self.add_temp(temp, tipo_res)
             self.quad_list.append(
                 Quadruple(Operator('+'), control.address, self.get_const(1, VarType.INT), temp_address))

@@ -42,7 +42,8 @@ class FunctionsDirectoryItem:
     return_type: ReturnType
     param_table: list = None
     start_addr: int = None
-    partition_sizes: [int, int, int, int] = None
+    local_partition_sizes: [int, int, int, int] = None
+    temp_partition_sizes: [int, int, int, int] = None
 
 
 @dataclass

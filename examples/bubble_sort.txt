@@ -1,0 +1,42 @@
+program bubble_sort
+
+main() {
+    var arr[10]: int
+    arr[0] = 5
+    arr[1] = 8
+    arr[2] = 1
+    arr[3] = 3
+    arr[4] = 7
+    arr[5] = 10
+    arr[6] = 2
+    arr[7] = 9
+    arr[8] = 6
+    arr[9] = 4
+
+    var n: int
+    n = 9
+    var i: int
+    var j: int
+    
+    write("Array antes de sort")
+    for i = 0 to n+1 {
+        write(arr[i])
+    }
+
+    for i = 0 to n+1 {
+        for j = 0 to n-i {
+            if (arr[j] > arr[j+1]) {
+                var aux: int
+                aux = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = aux
+            }
+        }
+    }
+
+
+    write("Array despues de sort")
+    for i = 0 to n+1 {
+        write(arr[i])
+    }
+}
