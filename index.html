@@ -159,6 +159,9 @@
   ipcRenderer.on('input', (event, arg) => {
     Blockly.prompt(arg, '', (e) => {
       console.log(e);
+      if (e !== null) {
+        e = '';
+      }
       ipcRenderer.send('input-value', e);
     });
   });

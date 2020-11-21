@@ -493,8 +493,7 @@ Blockly.VariablesDynamic.flyoutCategoryBlocks = (workspace) => {
         let uses = workspace.getVariableUsesById(variable.getId())
         let needsDeclaration = true;
         for (let i = 0, block; (block = uses[i]); i++) {
-          if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn'
-            || block.type === 'for_loop') {
+          if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn') {
             needsDeclaration = false;
             break;
           }
