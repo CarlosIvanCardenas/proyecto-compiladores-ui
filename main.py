@@ -11,7 +11,8 @@ def main():
         code = sys.argv[1]
     else:
         # Lee codigo desde un archivo especificado
-        input_file = open("examples/fun_declaration_and_call", "r")
+        input_file = open("examples/fibonacci_recursive.txt", "r")
+        #input_file = open("examples/test_success3.txt", "r")
         code = input_file.read()
         input_file.close()
 
