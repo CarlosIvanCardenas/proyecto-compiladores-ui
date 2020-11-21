@@ -396,7 +396,7 @@ class CompParser(SlyParser):
     def expresion1(self, _):
         if DEBUG_PARSER:
             print('Regla: expresion1')
-        if self.semantics.operators_stack[-1] in ['>', '<', '!=', '==']:
+        if self.semantics.operators_stack[-1] in ['<=', '>=', '>', '<', '!=', '==']:
             self.semantics.generate_quad()
         pass
 
@@ -406,7 +406,7 @@ class CompParser(SlyParser):
             print('Regla: expresion1')
         pass
 
-    @_('GT', 'LT', 'NE', 'EQ')
+    @_('LTEQ', 'GTEQ', 'GT', 'LT', 'NE', 'EQ')
     def expresion2(self, p):
         if DEBUG_PARSER:
             print('Regla: expresion2')
@@ -540,18 +540,32 @@ class CompParser(SlyParser):
         return []
 
     # USAGE
-    @_('ID "[" exp "]"')
+    @_('ID add_fondo exp remove_fondo')
     def array_usage(self, p):
         self.semantics.array_usage(p.ID, 1)
         if DEBUG_PARSER:
             print('Regla: array_usage 1 dimension')
         pass
 
-    @_('ID "[" exp "]" "[" exp "]"')
+    @_('ID add_fondo exp remove_fondo add_fondo exp remove_fondo')
     def array_usage(self, p):
         self.semantics.array_usage(p.ID, 2)
         if DEBUG_PARSER:
             print('Regla: array_usage 2 dimensiones')
+        pass
+
+    @_('"["')
+    def add_fondo(self, _):
+        self.semantics.operators_stack.append('(')
+        if DEBUG_PARSER:
+            print('Regla: add_fondo')
+        pass
+
+    @_('"]"')
+    def remove_fondo(self, _):
+        self.semantics.operators_stack.pop()
+        if DEBUG_PARSER:
+            print('Regla: add_fondo')
         pass
 
     @_('')

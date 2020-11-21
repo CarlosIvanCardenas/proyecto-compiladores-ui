@@ -3,7 +3,7 @@ from sly.lex import Lexer as SlyLexer
 class CompLexer(SlyLexer):
     # Set of token names
     tokens = {PROGRAM, ID, VAR, INT, FLOAT, CHAR, FUN, VOID, RETURN, MAIN, IF, ELSE, READ, WRITE, FOR, TO, WHILE,
-              AND, OR, EQ, NE, LT, GT, ASSIGN, CTE_S, CTE_I, CTE_F, CTE_C}
+              AND, OR, EQ, NE, LTEQ, GTEQ, LT, GT, ASSIGN, CTE_S, CTE_I, CTE_F, CTE_C}
 
     # Set of literal tokens
     literals = {'(', ')', '[', ']', '{', '}', ';', ':', ',', '+', '-', '*', '/'}
@@ -17,6 +17,8 @@ class CompLexer(SlyLexer):
     EQ = r'=='
     ASSIGN = r'='
     NE = r'!='
+    LTEQ = r'<='
+    GTEQ = r'>='
     LT = r'<'
     GT = r'>'
     CTE_S = r'\".+\"'

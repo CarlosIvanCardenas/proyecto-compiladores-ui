@@ -1,0 +1,31 @@
+program fibonacci_recursive
+
+var int_variable: int
+var float_variable: float
+var char_variable: char
+
+fun fibonacci(n: int): int {
+    var val: int
+    if (n <= 0) {
+        write("Incorrect input")
+        val = 0
+    } else {
+        if ( n == 1) {
+            val = 0
+        } else {
+            if (n == 2) {
+                val = 1
+            } else {
+                val = fibonacci(n-1) + fibonacci(n-2)
+            }
+        }
+    }
+    return (val)
+}
+
+main() {
+    var n: int
+    write("Escribe valor de n: ")
+    read(n)
+    write(fibonacci(n))
+}

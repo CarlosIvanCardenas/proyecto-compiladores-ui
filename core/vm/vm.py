@@ -50,9 +50,6 @@ class VM:
         self.const_memory = dict(map(lambda c: (c[1].address, c[1]), const_table.items()))
         self.fun_dir = fun_dir
 
-        for const in const_table.items():
-            print(const)
-
     def get_current_frame(self):
         """
         Funcion que regresa el frame actual, el cual se encuentra al tope del stack de ejecucion
@@ -225,7 +222,7 @@ class VM:
             """
             # TODO: Revisar como implementar en UI
             var_type = frame.memory.get_partition(C)
-            user_input = input("READ: ")
+            user_input = input(f'READ {var_type}: ')
             if var_type == VarType.INT:
                 try:
                     user_input = int(user_input)

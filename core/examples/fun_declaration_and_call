@@ -49,11 +49,37 @@ main() {
     int_variable = sum(2, 4)
     write(int_variable)
 
-    int_variable = sum(2*5, 5+5)
+    int_variable = sum(2*5, sum(2,3))
     write(int_variable)
 
+    # Test arreglos una dimension.
     var arr[2] : int
     arr[0] = 4
     arr[1] = 2
     write(arr[0])
+    write(arr[1])
+    arr[0] = arr[0] + arr[1]
+    write(arr[0])
+    arr[0] = arr[0] * arr[1]
+    write(arr[0])
+    arr[0] = 5 * arr[1]
+    write(arr[0])
+    arr[0] = arr[1] / 2
+    write(arr[0])
+
+
+    # Test arreglos dos dimensiones
+    var arr2[2][4] : int
+    arr2[0][0] = 16
+    arr2[1][3] = 20
+    write(arr2[0][0])
+    write(arr2[1][3])
+
+    var arr3[3][4] : float
+    arr3[0][0] = 4.20
+    arr3[1][3] = 19.9
+    write(arr3[0][0])
+    write(arr3[1][3])
+
+    
 }

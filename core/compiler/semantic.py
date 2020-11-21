@@ -130,12 +130,12 @@ class SemanticActions:
         elif len(dims) == 1:
             size = dims[0]
             dimensions = (dims[0], 0)
-            self.add_const(dims[0], VarType.INT)
+            self.get_const(dims[0], VarType.INT)
         else:
             size = dims[0] * dims[1]
             dimensions = (dims[0], dims[1])
-            self.add_const(dims[0], VarType.INT)
-            self.add_const(dims[1], VarType.INT)
+            self.get_const(dims[0], VarType.INT)
+            self.get_const(dims[1], VarType.INT)
 
         addr: int
         if self.current_scope == 'global':
@@ -611,13 +611,13 @@ class SemanticActions:
                             Quadruple(Operator.VERIFY, dim1_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[0], VarType.INT)))
                         temp1_id = "_temp_" + str(self.temp_vars_index)
-                        temp1_addr = self.add_temp(temp_id, VarType.INT)
+                        temp1_addr = self.add_temp(temp1_id, VarType.INT)
                         self.temp_vars_index += 1
                         self.quad_list.append(
                             Quadruple(Operator.TIMES, dim1_var.address, self.get_const(var.dims[1], VarType.INT),
                                       temp1_addr))
                         temp2_id = "_temp_" + str(self.temp_vars_index)
-                        temp2_addr = self.add_temp(temp_id, VarType.INT)
+                        temp2_addr = self.add_temp(temp2_id, VarType.INT)
                         self.temp_vars_index += 1
                         self.quad_list.append(
                             Quadruple(Operator.PLUS, temp1_addr, self.get_const(var.address, VarType.INT), temp2_addr))
@@ -625,13 +625,13 @@ class SemanticActions:
                             Quadruple(Operator.VERIFY, dim2_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[1], VarType.INT)))
                         temp3_id = "_temp_" + str(self.temp_vars_index)
-                        temp3_addr = self.add_temp(temp_id, VarType.INT)
+                        temp3_addr = self.add_temp(temp3_id, VarType.INT)
                         self.temp_vars_index += 1
                         self.quad_list.append(
                             Quadruple(Operator.PLUS, temp2_addr, dim2_var.address, temp3_addr))
                         # pointer_id tiene la direccion del arreglo indexado
                         pointer_id = "_pointer_" + str(self.temp_vars_index)
-                        pointer_addr = self.add_pointer(temp_id, var.type)
+                        pointer_addr = self.add_pointer(pointer_id, var.type)
                         self.temp_vars_index += 1
                         self.quad_list.append(Quadruple(Operator.ASSIGNPTR, temp3_addr, '', pointer_addr))
                         self.operands_stack.append(pointer_id)
