@@ -30,15 +30,32 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('asynchronous-message', (event, arg) => {
+ipcMain.on('execute', (event, arg) => {
   let python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
   python.stdout.on('data', function(data) {
     console.log(data.toString())
-    event.reply('asynchronous-reply', data.toString())
+    if (data.toString().indexOf("READ")) {
+      event.reply('input', data.toString())
+      ipcMain.on('input-value', (event, arg) => {
+        python.stdin.write(arg.toString())
+        python.stdin.end()
+      })
+    } else {
+      event.reply('output', data.toString())
+    }
   })
+  python.stdin.setEncoding('utf-8');
   python.stderr.on('data', function(err) {
     console.log(err.toString())
-    event.reply('asynchronous-reply', err.toString())
+    let errorIndex = err.toString().indexOf("Exception:")
+    if (errorIndex !== -1) {
+      event.reply('output', err.toString().slice(errorIndex))
+    } else {
+      errorIndex = err.toString().indexOf("TypeError:")
+      if (errorIndex !== -1) {
+        event.reply('output', err.toString().slice(errorIndex))
+      }
+    }
   })
   python.on('close', function (code) {
     console.log('child process exited with code ' + code)

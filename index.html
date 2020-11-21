@@ -23,7 +23,7 @@
             flex-grow: 1;
         }
 
-        button {
+        .run-button {
             background-color: #4CAF50;
             border: none;
             color: white;
@@ -49,7 +49,7 @@
             <h1>Dale++</h1>
         </div>
         <div class="flex-item">
-            <button onclick="runPythonScripts()">Run</button>
+            <button class="run-button" onclick="runPythonScripts()">Run</button>
         </div>
     </div>
     <div class="row">
@@ -151,17 +151,25 @@
   workspace.addChangeListener(myUpdateFunction);
 
   // Set listener for compiler output
-  ipcRenderer.on('asynchronous-reply', (event, arg) => {
-    alert(arg);
+  ipcRenderer.on('output', (event, arg) => {
+    Blockly.alert(arg);
+  });
+
+  // Set listener for compiler needs input
+  ipcRenderer.on('input', (event, arg) => {
+    Blockly.prompt(arg, '', (e) => {
+      console.log(e);
+      ipcRenderer.send('input-value', e);
+    });
   });
 
   // Run compiler
   function runPythonScripts() {
     let code = customGenerator.workspaceToCode(workspace);
     if (code.toString() === "") {
-      alert("Drag blocks from the toolbox to generate code.")
+      Blockly.alert("Drag blocks from the toolbox to generate code.")
     } else {
-      ipcRenderer.send('asynchronous-message', code);
+      ipcRenderer.send('execute', code);
     }
   }
 </script>

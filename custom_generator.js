@@ -206,7 +206,7 @@ customGenerator['arithmetic_operation'] = (block) => {
 // PROGRAM
 customGenerator['program'] = (block) => {
   const id = block.getFieldValue('ID');
-  return 'program = ' + id + '\n';
+  return 'program ' + id + '\n';
 };
 
 // MAIN
@@ -225,18 +225,18 @@ customGenerator['procedures_defreturn'] = (block) => {
   let returnValue = customGenerator.valueToCode(block, 'RETURN',
     customGenerator.ORDER_NONE) || '';
   if (returnValue) {
-    returnValue = customGenerator.INDENT + 'return ' + returnValue + '\n';
+    returnValue = customGenerator.INDENT + 'return (' + returnValue + ')\n';
   }
 
   let code = 'fun ' + funName + '(';
   const variables = block.getVarModels();
   for (let i = 0; i < variables.length; i++) {
     code += customGenerator.variableDB_.getName(variables[i].name, Blockly.VARIABLE_CATEGORY_NAME)
-      + ':' + variables[i].type + ', ';
+      + ': ' + variables[i].type + ', ';
   }
   if (variables.length > 0)
     code = code.substring(0, code.length - 2);
-  code += ') : ' + type + ' {\n' + branch + returnValue + '}\n';
+  code += '): ' + type + ' {\n' + branch + returnValue + '}\n';
   return code;
 };
 
@@ -256,11 +256,11 @@ customGenerator['procedures_defnoreturn'] = (block) => {
   const variables = block.getVarModels();
   for (let i = 0; i < variables.length; i++) {
     code += customGenerator.variableDB_.getName(variables[i].name, Blockly.VARIABLE_CATEGORY_NAME)
-      + ':' + variables[i].type + ', ';
+      + ': ' + variables[i].type + ', ';
   }
   if (variables.length > 0)
     code = code.substring(0, code.length - 2);
-  code += ') : void {\n' + branch + returnValue + '}\n';
+  code += '): void {\n' + branch + returnValue + '}\n';
   return code;
 };
 
@@ -419,7 +419,7 @@ customGenerator['variable_declaration'] = (block) => {
     code += ' [' + dim2 + ']';
   }
   const type = block.getFieldValue('TYPE');
-  code += ' : ' + type + '\n';
+  code += ': ' + type + '\n';
   return code;
 }
 
