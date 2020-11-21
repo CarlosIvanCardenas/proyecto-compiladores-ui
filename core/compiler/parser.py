@@ -1,4 +1,4 @@
-from sly import Parser as SlyParser
+from sly.yacc import Parser as SlyParser
 from compiler.lexer import Tokens
 from compiler.semantic import SemanticActions
 from compiler.symbol_table import ReturnType, VarType
