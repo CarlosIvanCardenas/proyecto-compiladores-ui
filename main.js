@@ -31,9 +31,16 @@ app.on('activate', () => {
 })
 
 ipcMain.on('asynchronous-message', (event, arg) => {
-  console.log(arg)
-  let python = spawn('python', [path.join(app.getAppPath(), '..', 'core/main.py'), arg])
+  let python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
   python.stdout.on('data', function(data) {
+    console.log(data.toString())
     event.reply('asynchronous-reply', data.toString())
+  })
+  python.stderr.on('data', function(err) {
+    console.log(err.toString())
+    event.reply('asynchronous-reply', err.toString())
+  })
+  python.on('close', function (code) {
+    console.log('child process exited with code ' + code)
   })
 })

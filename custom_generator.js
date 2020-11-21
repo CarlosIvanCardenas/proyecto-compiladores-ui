@@ -205,7 +205,7 @@ customGenerator['arithmetic_operation'] = (block) => {
 
 // PROGRAM
 customGenerator['program'] = (block) => {
-  const id = customGenerator.valueToCode(block, 'ID', customGenerator.ORDER_NONE);
+  const id = block.getFieldValue('ID');
   return 'program = ' + id + '\n';
 };
 

@@ -133,9 +133,9 @@ Blockly.defineBlocksWithJsonArray([
     "message0": "program id = %1",
     "args0": [
       {
-        "type": "input_value",
+        "type": "field_input",
         "name": "ID",
-        "check": ["String", "char"]
+        "text": "my_program"
       }
     ],
     "inputsInline": false,
