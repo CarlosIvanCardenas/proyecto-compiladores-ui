@@ -15,7 +15,8 @@ de memoria local correspondiente.
 @dataclass
 class Frame:
     IP: int
-    memory: AddressBlock
+    local_memory: AddressBlock
+    temp_memory: AddressBlock
 
 
 class VM:
@@ -40,10 +41,11 @@ class VM:
         :param fun_dir: Tabla que almacena la informacion de las funciones a ejecutar.
         """
         self.global_memory = AddressBlock(GLOBAL_ADDRESS_RANGE[0], GLOBAL_ADDRESS_RANGE[1])
-        self.temp_memory = AddressBlock(TEMP_ADDRESS_RANGE[0], TEMP_ADDRESS_RANGE[1])
         self.pointer_memory = AddressBlock(POINTER_ADDRESS_RANGE[0], POINTER_ADDRESS_RANGE[1])
         self.execution_stack = [Frame(IP=0,
-                                      memory=AddressBlock(LOCAL_ADDRESS_RANGE[0], LOCAL_ADDRESS_RANGE[1]))]
+                                      local_memory=AddressBlock(LOCAL_ADDRESS_RANGE[0], LOCAL_ADDRESS_RANGE[1]),
+                                      temp_memory=AddressBlock(TEMP_ADDRESS_RANGE[0], TEMP_ADDRESS_RANGE[1]))]
+        self.next_frame: Frame = None
         self.next_exe_scope: ExeScope = None
 
         self.quad_list = quad_list
@@ -64,20 +66,29 @@ class VM:
         :return: La memoria local actual de ejecucion
         """
         current_frame = self.get_current_frame()
-        return current_frame.memory
+        return current_frame.local_memory
 
-    def start_new_frame(self, IP, int_size, float_size, char_size, bool_size):
+    def start_new_frame(self, IP, local_partition_sizes, temp_partition_sizes):
         """
         Genera un nuevo frame y lo guarda temporalmente en self.next_frame para preparar a la MV
         para el cambio de contexto.
         """
-        self.next_frame = Frame(IP=IP, memory=AddressBlock(
-            LOCAL_ADDRESS_RANGE[0],
-            LOCAL_ADDRESS_RANGE[1],
-            int_size,
-            float_size,
-            char_size,
-            bool_size))
+        self.next_frame = Frame(
+            IP=IP,
+            local_memory=AddressBlock(
+                LOCAL_ADDRESS_RANGE[0],
+                LOCAL_ADDRESS_RANGE[1],
+                local_partition_sizes[0],
+                local_partition_sizes[1],
+                local_partition_sizes[2],
+                local_partition_sizes[3]),
+            temp_memory=AddressBlock(
+                TEMP_ADDRESS_RANGE[0],
+                TEMP_ADDRESS_RANGE[1],
+                temp_partition_sizes[0],
+                temp_partition_sizes[1],
+                temp_partition_sizes[2],
+                temp_partition_sizes[3]))
 
     def switch_to_new_frame(self):
         """
@@ -108,7 +119,7 @@ class VM:
         elif CONST_ADDRESS_RANGE[0] <= addr < CONST_ADDRESS_RANGE[1]:
             raise MemoryError('Cannot to write to read-only memory')
         elif TEMP_ADDRESS_RANGE[0] <= addr < TEMP_ADDRESS_RANGE[1]:
-            self.temp_memory.write(addr, value)
+            self.get_current_frame().temp_memory.write(addr, value)
         elif POINTER_ADDRESS_RANGE[0] <= addr < POINTER_ADDRESS_RANGE[1]:
             real_addr = self.pointer_memory.read(addr)
             self.write(real_addr, value)
@@ -123,12 +134,6 @@ class VM:
         :param addr: Dirección (absoluta) de la cual se desea leer un valor.
         :return: El valor asignado en la dirección "addr".
         """
-        # FOR DEBUG PURPOSES
-        if addr is None:
-            return ''
-        if type(addr) is str:
-            return addr
-
         if GLOBAL_ADDRESS_RANGE[0] <= addr < GLOBAL_ADDRESS_RANGE[1]:
             return self.global_memory.read(addr)
         elif LOCAL_ADDRESS_RANGE[0] <= addr < LOCAL_ADDRESS_RANGE[1]:
@@ -142,7 +147,7 @@ class VM:
             else:
                 return const.name
         elif TEMP_ADDRESS_RANGE[0] <= addr < TEMP_ADDRESS_RANGE[1]:
-            return self.temp_memory.read(addr)
+            return self.get_current_frame().temp_memory.read(addr)
         elif POINTER_ADDRESS_RANGE[0] <= addr < POINTER_ADDRESS_RANGE[1]:
             real_addr = self.pointer_memory.read(addr)
             return self.read(real_addr)
@@ -165,7 +170,7 @@ class VM:
         elif CONST_ADDRESS_RANGE[0] <= addr < CONST_ADDRESS_RANGE[1]:
             raise MemoryError('There is not const arrays')
         elif TEMP_ADDRESS_RANGE[0] <= addr < TEMP_ADDRESS_RANGE[1]:
-            return self.temp_memory.read_block(addr, size)
+            return self.get_current_frame().temp_memory.read_block(addr, size)
         elif POINTER_ADDRESS_RANGE[0] <= addr < POINTER_ADDRESS_RANGE[1]:
             real_addr = self.pointer_memory.read_block(direct, size)
             return self.read(real_addr)
@@ -220,9 +225,8 @@ class VM:
             READ se encarga de leer el input del usuario, Este input se recoge y se intenta hacer un cast al tipo
             de la variable donde se guardara el input.
             """
-            # TODO: Revisar como implementar en UI
-            var_type = frame.memory.get_partition(C)
-            user_input = input(f'READ {var_type}: ')
+            var_type = frame.local_memory.get_partition(C)
+            user_input = input(f'READ {var_type.value}: ')
             if var_type == VarType.INT:
                 try:
                     user_input = int(user_input)
@@ -288,7 +292,7 @@ class VM:
             Esta funcion se utiliza para mapear los valores para el parametro C en el contexto
             de ejecucion proximo a despertar.
             """
-            self.next_frame.memory.write(C, self.read(A))
+            self.next_frame.local_memory.write(C, self.read(A))
 
         elif instruction == Operator.ENDFUN:
             """
@@ -304,10 +308,8 @@ class VM:
             """
             self.start_new_frame(
                 IP=self.fun_dir[C].start_addr,
-                int_size=self.fun_dir[C].partition_sizes[0],
-                float_size=self.fun_dir[C].partition_sizes[1],
-                char_size=self.fun_dir[C].partition_sizes[2],
-                bool_size=self.fun_dir[C].partition_sizes[3],
+                local_partition_sizes=self.fun_dir[C].local_partition_sizes,
+                temp_partition_sizes=self.fun_dir[C].temp_partition_sizes
             )
         elif instruction == Operator.VERIFY:
             """

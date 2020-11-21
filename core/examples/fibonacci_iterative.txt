@@ -1,0 +1,29 @@
+program fibonacci_iterative
+
+fun fibonacci(n: int): int {
+    var i: int
+    var previouspreviousnumber: int
+    var previousnumber: int
+    var currentnumber: int
+    previousnumber = 0
+    currentnumber = 1
+    for i = 1 to n {
+        previouspreviousnumber = previousnumber
+        previousnumber = currentnumber
+        currentnumber = previouspreviousnumber + previousnumber
+    }
+    return (currentnumber)
+}
+
+main() {
+    var n: int
+    var f: int
+    write("Escribe valor de n: ")
+    read(n)
+    if (n < 0) {
+        write("Incorrect input")
+    } else {
+        f = fibonacci(n)
+        write(f)
+    }
+}
