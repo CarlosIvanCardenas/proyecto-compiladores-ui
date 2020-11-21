@@ -1,17 +1,23 @@
-from common.scope_size import GLOBAL_ADDRESS_RANGE, LOCAL_ADDRESS_RANGE, CONST_ADDRESS_RANGE, TEMP_ADDRESS_RANGE
-from compiler.quadruple import Operator
+from dataclasses import dataclass
+from common.scope_size import GLOBAL_ADDRESS_RANGE, LOCAL_ADDRESS_RANGE, CONST_ADDRESS_RANGE, TEMP_ADDRESS_RANGE, \
+    POINTER_ADDRESS_RANGE
+from compiler.quadruple import Operator, Quadruple
 from compiler.symbol_table import VarType
 from vm.memory import AddressBlock
+from common.debug_flags import DEBUG_VM
 
 """
 Esta clase se utiliza para guardar el contexto de ejecucion.
 Contiene la posicion del instruction pointer, ademas del bloque
 de memoria local correspondiente.
 """
+
+
 @dataclass
 class Frame:
-  IP: int
-  memory: AddressBlock
+    IP: int
+    memory: AddressBlock
+
 
 class VM:
     """
@@ -25,6 +31,7 @@ class VM:
         const_memory:       Partición de memoria para los valores constantes (read-only).
         fun_dir:            Tabla que almacena la informacion de las funciones a ejecutar.
     """
+
     def __init__(self, quad_list, const_table, fun_dir):
         """
         Inicializa los atributos de la clase VM.
@@ -36,12 +43,12 @@ class VM:
         self.global_memory = AddressBlock(GLOBAL_ADDRESS_RANGE[0], GLOBAL_ADDRESS_RANGE[1])
         self.temp_memory = AddressBlock(TEMP_ADDRESS_RANGE[0], TEMP_ADDRESS_RANGE[1])
         self.pointer_memory = AddressBlock(POINTER_ADDRESS_RANGE[0], POINTER_ADDRESS_RANGE[1])
-        self.execution_stack = [Frame(IP = 0, 
-            memory = AddressBlock(LOCAL_ADDRESS_RANGE[0], LOCAL_ADDRESS_RANGE[1]))]
+        self.execution_stack = [Frame(IP=0,
+                                      memory=AddressBlock(LOCAL_ADDRESS_RANGE[0], LOCAL_ADDRESS_RANGE[1]))]
         self.next_exe_scope: ExeScope = None
 
         self.quad_list = quad_list
-        self.const_memory = dict(map(lambda c: (c[1], c[0]), const_table.values()))
+        self.const_memory = dict(map(lambda c: (c[1].address, c[1]), const_table.items()))
         self.fun_dir = fun_dir
 
     def get_current_frame(self):
@@ -60,17 +67,17 @@ class VM:
         current_frame = self.get_current_frame()
         return current_frame.memory
 
-    def start_new_frame(self, IP, int_size, float_Size, char_size, bool_size):
+    def start_new_frame(self, IP, int_size, float_size, char_size, bool_size):
         """
         Genera un nuevo frame y lo guarda temporalmente en self.next_frame para preparar a la MV
         para el cambio de contexto.
         """
         # TODO: Definir bien los rangos del nuevo frame
-        self.next_frame = Frame(IP=IP, memory=MemoryBlock(
+        self.next_frame = Frame(IP=IP, memory=AddressBlock(
             LOCAL_ADDRESS_RANGE[0],
             LOCAL_ADDRESS_RANGE[1],
             int_size,
-            float_Size,
+            float_size,
             char_size,
             bool_size))
 
@@ -79,14 +86,14 @@ class VM:
         Anade el nuevo contexto al execution stack para completar el cambio de contexto una vez que la MV
         esta lista, y deja self.next_frame vacia.
         """
-        self.frames.append(self.next_frame)
+        self.execution_stack.append(self.next_frame)
         self.next_frame = None
 
     def restore_past_frame(self):
         """
         Elimina el frame actual cuando la funcion que lo necesitaba termina su ejecucion
         """
-        self.frames.pop()
+        self.execution_stack.pop()
 
     def write(self, addr, value):
         """
@@ -106,7 +113,7 @@ class VM:
             self.temp_memory.write(addr, value)
         elif POINTER_ADDRESS_RANGE[0] <= addr < POINTER_ADDRESS_RANGE[1]:
             real_addr = self.pointer_memory.read(addr)
-            self.write(real_addr)
+            self.write(real_addr, value)
         else:
             raise MemoryError('Address out of bounds')
 
@@ -118,12 +125,24 @@ class VM:
         :param addr: Dirección (absoluta) de la cual se desea leer un valor.
         :return: El valor asignado en la dirección "addr".
         """
+        # FOR DEBUG PURPOSES
+        if addr is None:
+            return ''
+        if type(addr) is str:
+            return addr
+
         if GLOBAL_ADDRESS_RANGE[0] <= addr < GLOBAL_ADDRESS_RANGE[1]:
             return self.global_memory.read(addr)
         elif LOCAL_ADDRESS_RANGE[0] <= addr < LOCAL_ADDRESS_RANGE[1]:
             return self.get_current_memory().read(addr)
         elif CONST_ADDRESS_RANGE[0] <= addr < CONST_ADDRESS_RANGE[1]:
-            return self.const_memory[addr]
+            const = self.const_memory[addr]
+            if const.type == VarType.INT:
+                return int(const.name)
+            elif const.type == VarType.FLOAT:
+                return float(const.name)
+            else:
+                return const.name
         elif TEMP_ADDRESS_RANGE[0] <= addr < TEMP_ADDRESS_RANGE[1]:
             return self.temp_memory.read(addr)
         elif POINTER_ADDRESS_RANGE[0] <= addr < POINTER_ADDRESS_RANGE[1]:
@@ -162,7 +181,15 @@ class VM:
         el resultado en el operando C
         """
         frame = self.get_current_frame()
-        (instruction, A, B, C) = self.quad_list[frame.IP]
+        current_quad: Quadruple
+        current_quad = self.quad_list[frame.IP]
+        instruction = current_quad.operator
+        A = current_quad.left_operand
+        B = current_quad.right_operand
+        C = current_quad.result
+
+        if DEBUG_VM:
+            print(f'{frame.IP}.\t{instruction}\tA:{A}\tB:{B}\tC:{C}')
 
         if instruction == Operator.PLUS:
             self.write(C, self.read(A) + self.read(B))
@@ -195,37 +222,39 @@ class VM:
             READ se encarga de leer el input del usuario, Este input se recoge y se intenta hacer un cast al tipo
             de la variable donde se guardara el input.
             """
+            # TODO: Revisar como implementar en UI
             var_type = frame.memory.get_partition(B)
             user_input = input()
             if var_type == VarType.INT:
                 try:
                     user_input = int(user_input)
                 except:
-                    raise Exception ("Can not cast input to int")
+                    raise TypeError("Can not cast input to int")
             elif var_type == VarType.FLOAT:
                 try:
                     user_input = float(user_input)
                 except:
-                    raise Exception ("Can not cast input to float")
+                    raise TypeError("Can not cast input to float")
             elif var_type == VarType.CHAR:
                 try:
                     user_input = str(user_input)
                 except:
-                    raise Exception ("Can not cast input to char")
+                    raise TypeError("Can not cast input to char")
             elif var_type == VarType.BOOL:
                 try:
                     user_input = bool(user_input)
                 except:
-                    raise Exception ("Can not cast input to bool")
+                    raise TypeError("Can not cast input to bool")
             self.write(C, user_input)
         elif instruction == Operator.WRITE:
             """
             WRITE escribe en pantalla el valor que se recoge de la variable que se intenta escribir.
             """
+            # TODO: Revisar como implementar en UI
             value = self.read(C)
-            if (type(value) == str):
+            if type(value) == str:
                 value = value.replace('\\n', '\n')
-            print(value, end = '')
+            print(value)
         elif instruction == Operator.GOTO:
             """
             GOTO actualiza el valor del instruction pointer hacia la direccion del salto
@@ -253,7 +282,7 @@ class VM:
             Adelanta el IP a la siguiente instruccion a ejecutar despues de terminar con la funcion y termina 
             el cambio de contexto al llamar a switch_to_new_frame
             """
-            frame.IP+=1
+            frame.IP += 1
             self.switch_to_new_frame()
             return
 
@@ -262,8 +291,7 @@ class VM:
             Esta funcion se utiliza para mapear los valores para el parametro C en el contexto
             de ejecucion proximo a despertar.
             """
-            #TODO: Terminar operacion parametro y verificar que sea compatible con semantica
-            self.next_frame.memory.write(C, self.read(B))
+            self.next_frame.memory.write(C, self.read(A))
 
         elif instruction == Operator.ENDFUN:
             """
@@ -278,11 +306,11 @@ class VM:
             la funcion a ejecutar (su direccion de inicio y los tamanos requeridos para sus variables).
             """
             self.start_new_frame(
-                IP=self.func_dir[C].start_addr,
-                int_size=self.func_dir[C].partition_sizes[0],
-                float_Size=self.func_dir[C].partition_sizes[1],
-                char_size=self.func_dir[C].partition_sizes[2],
-                bool_size=self.func_dir[C].partition_sizes[3],
+                IP=self.fun_dir[C].start_addr,
+                int_size=self.fun_dir[C].partition_sizes[0],
+                float_size=self.fun_dir[C].partition_sizes[1],
+                char_size=self.fun_dir[C].partition_sizes[2],
+                bool_size=self.fun_dir[C].partition_sizes[3],
             )
         elif instruction == Operator.VERIFY:
             """
@@ -292,13 +320,14 @@ class VM:
             index = int(self.read(A))
             if not B <= index < C:
                 raise Exception("Index out of bounds")
-        
+
         frame.IP += 1
 
     def run(self):
         """
         Ejecuta todas las intrucciones de la quad_list
         """
-        print("Inicio:")
+        if DEBUG_VM:
+            print("\nInicio ejecución:")
         while self.get_current_frame().IP < len(self.quad_list):
             self.next_instruction()
