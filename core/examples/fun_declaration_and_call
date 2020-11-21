@@ -51,4 +51,9 @@ main() {
 
     int_variable = sum(2*5, 5+5)
     write(int_variable)
+
+    var arr[2] : int
+    arr[0] = 4
+    arr[1] = 2
+    write(arr[0])
 }

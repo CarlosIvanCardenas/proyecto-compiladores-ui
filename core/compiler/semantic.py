@@ -126,7 +126,7 @@ class SemanticActions:
         """
         if len(dims) == 0:
             size = 1
-            dimensions = (0, 0)
+            dimensions = (1, 0)
         elif len(dims) == 1:
             size = dims[0]
             dimensions = (dims[0], 0)
@@ -219,16 +219,16 @@ class SemanticActions:
             var = VarTableItem(
                 name=str(const_value),
                 type=VarType(const_type),
-                dims=(0, 0),
+                dims=(1, 0),
                 size=1,
                 address=addr)
         else:
-            addr = self.v_memory_manager.const_addr.allocate_addr(VarType.CHAR, len(const_value))
+            addr = self.v_memory_manager.const_addr.allocate_addr(VarType.CHAR, len(const_value)-2)
             var = VarTableItem(
                 name=str(const_value),
                 type=VarType(const_type),
-                dims=(len(const_value), 0),
-                size=len(const_value),
+                dims=(len(const_value)-2, 0),
+                size=len(const_value)-2,
                 address=addr)
 
         self.const_table[str(const_value)] = var
@@ -276,15 +276,18 @@ class SemanticActions:
         else:
             raise Exception("Operation stack error")
 
-    def generate_quad_assign(self, name_var):
+    def generate_quad_assign(self, name_var="", array=False):
         """
         Función para generar un cuadruplo de asignación utilizando la pila de operandos
 
         :param name_var: nombre de la variable donde se va a asignar el valor
         """
         if self.operands_stack:
-            left_operand = self.get_var(name_var)
             right_operand = self.get_var(self.operands_stack.pop())
+            if array:
+                left_operand = self.get_var(self.operands_stack.pop())
+            else:
+                left_operand = self.get_var(name_var)
             result_type = self.semantic_cube.type_match(left_operand.type, right_operand.type, Operator.ASSIGN)
             if result_type != "error":
                 self.quad_list.append(Quadruple(Operator.ASSIGN, right_operand.address, None, left_operand.address))
@@ -508,7 +511,7 @@ class SemanticActions:
         else:
             raise Exception("Jump stack error")
 
-    def fun_call(self, fun_name, arg_list):
+    def fun_call(self, fun_name, arg_list, needs_return=False):
         """
         Genera las acciones necesarias para llamar a una función.
         Verifica coherencia en tipos y número de argumentos.
@@ -516,8 +519,11 @@ class SemanticActions:
         :param fun_name: Nombre o identificador de la función a llamar.
         :param arg_list: Lista de argumentos de la llamada a función.
         """
+        arg_list.reverse()
         # Verify that the function exists into the DirFunc
         fun = self.get_fun(fun_name)
+        if needs_return and fun.return_type == ReturnType.VOID:
+            raise Exception('Semantic Error: ' + fun.name + " is void. Return needed.")
         # Verify coherence in number of parameters
         if len(fun.param_table) != len(arg_list):
             raise Exception('Incorrect number of arguments in function call: ' + fun.name)
@@ -573,13 +579,18 @@ class SemanticActions:
                         self.quad_list.append(
                             Quadruple(Operator.VERIFY, dim_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[0], VarType.INT)))
+                        temp_id = "_temp_" + str(self.temp_vars_index)
+                        temp_addr = self.add_temp(temp_id, var.type)
+                        self.temp_vars_index += 1
+                        self.quad_list.append(
+                            Quadruple(Operator.PLUS, dim_var.address, self.get_const(var.address, VarType.INT),
+                                      temp_addr))
                         # pointer_id tiene la direccion del arreglo indexado
                         pointer_id = "_pointer_" + str(self.temp_vars_index)
                         pointer_addr = self.add_pointer(pointer_id, var.type)
                         self.temp_vars_index += 1
                         self.quad_list.append(
-                            Quadruple(Operator.PLUS, dim_var.address, self.get_const(var.address, VarType.INT),
-                                      pointer_addr))
+                            Quadruple(Operator.ASSIGNPTR, temp_addr, '', pointer_addr))
                         self.operands_stack.append(pointer_id)
                     else:
                         raise Exception("Index type error")
@@ -613,11 +624,16 @@ class SemanticActions:
                         self.quad_list.append(
                             Quadruple(Operator.VERIFY, dim2_var.address, self.get_const(0, VarType.INT),
                                       self.get_const(var.dims[1], VarType.INT)))
+                        temp3_id = "_temp_" + str(self.temp_vars_index)
+                        temp3_addr = self.add_temp(temp_id, VarType.INT)
+                        self.temp_vars_index += 1
+                        self.quad_list.append(
+                            Quadruple(Operator.PLUS, temp2_addr, dim2_var.address, temp3_addr))
                         # pointer_id tiene la direccion del arreglo indexado
                         pointer_id = "_pointer_" + str(self.temp_vars_index)
                         pointer_addr = self.add_pointer(temp_id, var.type)
                         self.temp_vars_index += 1
-                        self.quad_list.append(Quadruple(Operator.PLUS, temp2_addr, dim2_var.address, pointer_addr))
+                        self.quad_list.append(Quadruple(Operator.ASSIGNPTR, temp3_addr, '', pointer_addr))
                         self.operands_stack.append(pointer_id)
                     else:
                         raise Exception("Index type error")
