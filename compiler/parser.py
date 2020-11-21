@@ -154,6 +154,7 @@ class CompParser(SlyParser):
     @_('MAIN "(" ")"')
     def start_main(self, _):
         self.semantics.complete_main_jump()
+        self.semantics.set_current_scope("main", ReturnType("void"))
         if DEBUG_PARSER:
             print('Regla: start_main')
         pass
@@ -261,27 +262,27 @@ class CompParser(SlyParser):
 
     # ESTATUTOS CONDICIONALES
     @_('start_if bloque condicion1')
-    def condicion(self, _):
+    def condicion(self, p):
         self.semantics.end_if()
         if DEBUG_PARSER:
             print('Regla: condicion')
         pass
 
     @_('IF "(" expresiones ")"')
-    def start_if(self, _):
+    def start_if(self, p):
         self.semantics.start_if()
         if DEBUG_PARSER:
             print('Regla: condicion')
         pass
 
     @_('inicio_else bloque', 'empty')
-    def condicion1(self, _):
+    def condicion1(self, p):
         if DEBUG_PARSER:
             print('Regla: condicion1')
         pass
 
     @_('ELSE')
-    def inicio_else(self, _):
+    def inicio_else(self, p):
         self.semantics.start_else()
         if DEBUG_PARSER:
             print('Regla: condicion1')
@@ -289,7 +290,7 @@ class CompParser(SlyParser):
 
     # LECTURA
     @_('READ "(" ID ")"')
-    def lectura(self, _):
+    def lectura(self, p):
         self.semantics.generar_lectura(p.ID)
         if DEBUG_PARSER:
             print('Regla: lectura')
@@ -297,14 +298,14 @@ class CompParser(SlyParser):
 
     # ESCRITURA
     @_('WRITE "(" constante ")"')
-    def escritura(self, _):
+    def escritura(self, p):
         self.semantics.generar_escritura()
         if DEBUG_PARSER:
             print('Regla: escritura')
         pass
 
     @_('WRITE "(" call_fun_no_void ")"')
-    def escritura(self, _):
+    def escritura(self, p):
         self.semantics.generar_escritura()
         if DEBUG_PARSER:
             print('Regla: escritura')
@@ -313,7 +314,7 @@ class CompParser(SlyParser):
     # CICLOS CONDICIONALES
     # FOR
     @_('inicio_for initial_value_for end_value_for bloque')
-    def ciclo_for(self, _):
+    def ciclo_for(self, p):
         self.semantics.end_for()
         if DEBUG_PARSER:
             print('Regla: ciclo_for')

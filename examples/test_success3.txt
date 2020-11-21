@@ -1,0 +1,7 @@
+program my_program
+
+main () {
+  var test : int
+  read(test)
+  write(test)
+}
