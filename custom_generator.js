@@ -412,11 +412,11 @@ customGenerator['variable_declaration'] = (block) => {
   const varType = block.getVarModels()[0].type;
   const dim1 = block.getFieldValue('DIM1');
   if (varType.indexOf('-') !== -1) {
-    code += ' [' + dim1 + ']';
+    code += '[' + dim1 + ']';
   }
   const dim2 = block.getFieldValue('DIM2');
   if (varType.indexOf('matrix') !== -1) {
-    code += ' [' + dim2 + ']';
+    code += '[' + dim2 + ']';
   }
   const type = block.getFieldValue('TYPE');
   code += ': ' + type + '\n';
