@@ -224,12 +224,12 @@ class SemanticActions:
                 size=1,
                 address=addr)
         else:
-            addr = self.v_memory_manager.const_addr.allocate_addr(VarType.CHAR, len(const_value)-2)
+            addr = self.v_memory_manager.const_addr.allocate_addr(VarType.CHAR, len(const_value))
             var = VarTableItem(
                 name=str(const_value),
                 type=VarType(const_type),
-                dims=(len(const_value)-2, 0),
-                size=len(const_value)-2,
+                dims=(len(const_value), 0),
+                size=len(const_value),
                 address=addr)
 
         self.const_table[str(const_value)] = var

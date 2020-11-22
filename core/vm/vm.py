@@ -255,7 +255,7 @@ class VM:
             value = self.read(C)
             if type(value) == str:
                 value = value.replace('\\n', '\n')
-            print(value)
+            print(value, end='')
         elif instruction == Operator.GOTO:
             """
             GOTO actualiza el valor del instruction pointer hacia la direccion del salto
