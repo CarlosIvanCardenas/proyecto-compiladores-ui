@@ -34,7 +34,7 @@ app.on('activate', () => {
 let python
 
 ipcMain.on('execute', (event, arg) => {
-  python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
+  python = spawn('python', [path.join(app.getAppPath(), '..', 'core/main.py'), arg])
   python.stdin.setEncoding('utf-8');
   python.stdout.on('data', function(data) {
     console.log(data.toString())
