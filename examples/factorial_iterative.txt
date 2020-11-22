@@ -3,7 +3,7 @@ program factorial_iterative
 fun factorial(n: int): int {
     var val: int
     var i: int
-        val = 1
+    val = 1
     for i = 1 to n+1 {
         val = val * i
     }

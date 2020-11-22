@@ -21,7 +21,6 @@ class CompLexer(SlyLexer):
     GTEQ = r'>='
     LT = r'<'
     GT = r'>'
-    CTE_S = r'\".+\"'
 
     # Identifiers and keywords
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
@@ -56,7 +55,12 @@ class CompLexer(SlyLexer):
 
     @_(r'\'.\'')
     def CTE_C(self, t):
-        t.value = "'" + t.value[1] + "'"
+        t.value = t.value[1]
+        return t
+
+    @_(r'\".+\"')
+    def CTE_S(self, t):
+        t.value = t.value[1:-1]
         return t
 
     # Line number tracking

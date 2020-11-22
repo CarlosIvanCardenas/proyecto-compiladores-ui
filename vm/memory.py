@@ -18,16 +18,10 @@ class AddressBlock:
         self.start_addr = start_addr
         self.default_size = (end_addr - start_addr + 1) // 4
 
-        # TODO: Revisar tamaño variable
-        self.int_size = self.default_size if int_size is None else int_size
-        self.float_size = self.default_size if float_size is None else float_size
-        self.char_size = self.default_size if char_size is None else char_size
-        self.bool_size = self.default_size if bool_size is None else bool_size
-
-        self.int_addr_block = [None] * self.int_size
-        self.float_addr_block = [None] * self.float_size
-        self.char_addr_block = [None] * self.char_size
-        self.bool_addr_block = [None] * self.bool_size
+        self.int_addr_block = [None] * self.default_size if int_size is None else int_size
+        self.float_addr_block = [None] * self.default_size if float_size is None else float_size
+        self.char_addr_block = [None] * self.default_size if char_size is None else char_size
+        self.bool_addr_block = [None] * self.default_size if bool_size is None else bool_size
 
     def get_partition(self, addr):
         """
