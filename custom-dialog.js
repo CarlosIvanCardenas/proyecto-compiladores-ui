@@ -101,6 +101,8 @@ CustomDialog.show = function(title, message, options) {
   dialogDiv.getElementsByClassName('customDialogTitle')[0]
     .appendChild(document.createTextNode(title));
   dialogDiv.getElementsByClassName('customDialogMessage')[0]
+    .setAttribute('style', 'white-space: pre;');
+  dialogDiv.getElementsByClassName('customDialogMessage')[0]
     .appendChild(document.createTextNode(message));
 
   var onOkay = function(event) {

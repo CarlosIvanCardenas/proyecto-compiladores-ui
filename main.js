@@ -34,14 +34,14 @@ app.on('activate', () => {
 let python
 
 ipcMain.on('execute', (event, arg) => {
-  python = spawn('python', [path.join(app.getAppPath(), '..', 'core/main.py'), arg])
+  python = spawn('python', [path.join(app.getAppPath(), 'core/main.py'), arg])
   python.stdin.setEncoding('utf-8');
   python.stdout.on('data', function(data) {
     console.log(data.toString())
     if (data.toString().indexOf("READ") !== -1) {
       event.reply('input', data.toString())
     } else {
-      event.reply('output', data.toString())
+      event.reply('output', data.toString().replaceAll('\\', ''))
     }
   })
   python.stderr.on('data', function(err) {
@@ -62,5 +62,5 @@ ipcMain.on('execute', (event, arg) => {
 })
 
 ipcMain.on('input-value', (event, arg) => {
-  python.stdin.write(arg.toString()+'\n')
+  python.stdin.write(arg.toString().replaceAll('\\n', '\n')+'\n')
 })
