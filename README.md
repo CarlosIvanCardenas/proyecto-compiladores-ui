@@ -1,4 +1,4 @@
-# Proyecto compiladores **Lenguaje Dale++**
+# Proyecto compiladores: **Lenguaje Dale++**
 Proyecto final de la materia "Diseño de compiladores"
 
 ## Avances actuales 
@@ -19,6 +19,15 @@ Proyecto final de la materia "Diseño de compiladores"
 - Se añadieron **acciones semanticas** para el uso de **arreglos**.
 
 ### Máquina Virtual
-- Se desarrollaron los componentes iniciales de la **máquina virtual**.
+- Se desarrolló la **memoria** para la maquina virtual.
+- Se añadieron funciones para el manejo de todas las **instrucciones** que genera el compilador.
+- Se desarrollo el **flujo de los cuadruplos** para su ejecución.
+- Se desarrollo el **stack de ejecución**.
 
 ### Interfaz Gráfica
+- Se añadieron todos los **bloques** necesarios para la gramática del lenguaje.
+- Se desarrolló la **generación de código a partir de los bloques** en el workspace.
+- Se incluyo **verificación de tipo de dato** en los bloques.
+- La interfaz ejecuta el compilador como un proceso hijo y le envia el código generado.
+- La interfaz maneja las entradas y salidas del compilador.
+- Se incluyo soporte para **guardar y cargar programas** de un archivo .txt
