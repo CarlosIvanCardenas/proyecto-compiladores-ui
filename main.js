@@ -39,7 +39,7 @@ ipcMain.on('execute', (event, arg) => {
   python.stdout.on('data', function(data) {
     console.log(data.toString())
     if (data.toString().indexOf("READ") !== -1) {
-      event.reply('input', data.toString())
+      event.reply('input', data.toString().replaceAll('\\', ''))
     } else {
       event.reply('output', data.toString().replaceAll('\\', ''))
     }

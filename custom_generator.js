@@ -2,13 +2,11 @@
 
 /**
  * Consideraciónes:
- * 2. No verifica que los parametros de distintas funciones se llamen diferente (No necesariamente es un
+ * 1. No verifica que los parametros de distintas funciones se llamen diferente (No necesariamente es un
  *    problema pero hay que verificar conflictos con tipos por variables sobre escritas).
- * 3. Ciclos FOR no verifican el tipo de la variable a iterar (pero no hay problema si se usa la variable
- *    que se crea por defecto)
- * 4. Una vez declarado un parametro no se puede cambiar su tipo o nombre *Funcionamiento intencionado*
+ * 2. Una vez declarado un parametro no se puede cambiar su tipo o nombre *Funcionamiento intencionado*
  *    (Hay que eliminarlo y crear uno nuevo)
- * 5. Ignorar condicional ifelse
+ * 3. Ignorar condicional ifelse
  * */
 
 // CUSTOM GENERATOR
