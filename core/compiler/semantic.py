@@ -273,9 +273,9 @@ class SemanticActions:
                     Quadruple(Operator(operator), left_operand.address, right_operand.address, result_addr))
                 self.operands_stack.append(result_id)
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Cannot perform operation " + str(operator) + " between " + str(left_operand.type) + " and " + str(right_operand.type))
         else:
-            raise Exception("Operation stack error")
+            raise Exception("Operation stack error: not enough operands")
 
     def generate_quad_assign(self, name_var="", array=False):
         """
@@ -293,9 +293,9 @@ class SemanticActions:
             if result_type != "error":
                 self.quad_list.append(Quadruple(Operator.ASSIGN, right_operand.address, None, left_operand.address))
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Cannot perform operation " + str(Operator.ASSIGN) + " between " + str(left_operand.type) + " and " + str(right_operand.type))
         else:
-            raise Exception("Operation stack error")
+            raise Exception("Operation stack error: not enough operands")
 
     def push_var_operand(self, operand):
         """
@@ -335,7 +335,7 @@ class SemanticActions:
             var = self.get_var(var_name)
             self.quad_list.append(Quadruple(Operator.WRITE, None, None, var.address))
         else:
-            raise Exception("Operation stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def start_if(self):
         """
@@ -347,9 +347,9 @@ class SemanticActions:
                 self.quad_list.append(Quadruple(Operator.GOTOF, res.address, None, None))
                 self.jumps_stack.append(len(self.quad_list) - 1)
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Needed BOOL type for if conditional")
         else:
-            raise Exception("Operand stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def start_else(self):
         """
@@ -389,9 +389,9 @@ class SemanticActions:
                 self.quad_list.append(Quadruple(Operator.GOTOF, res.address, None, None))
                 self.jumps_stack.append(len(self.quad_list) - 1)
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Needed BOOL type for while conditional")
         else:
-            raise Exception("Operand stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def end_while(self):
         """
@@ -415,7 +415,7 @@ class SemanticActions:
         if var.type == VarType.INT or var.type == VarType.FLOAT:
             self.operands_stack.append(var.name)
         else:
-            raise Exception("Type mismatch")
+            raise TypeError("Type mismatch: Control variable is not numeric but " + str(var.type))
 
     def valor_inicial_for(self):
         """
@@ -430,11 +430,11 @@ class SemanticActions:
                     self.quad_list.append(Quadruple(Operator.ASSIGN, exp.address, None, control.address))
                     self.operands_stack.append(control.name)
                 else:
-                    raise Exception("Type mismatch")
+                    raise TypeError("Type mismatch: Cannot perform operation " + str(Operator.ASSIGN) + " between " + str(control.type) + " and " + str(exp.type))
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Initial expression for for cycle is not numeric but " + str(exp.type))
         else:
-            raise Exception("Operand stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def valor_final_for(self):
         """
@@ -457,11 +457,11 @@ class SemanticActions:
                     self.jumps_stack.append(len(self.quad_list) - 1)
                     self.operands_stack.append(control.name)
                 else:
-                    raise Exception("Type mismatch")
+                    raise TypeError("Type mismatch: Control variable is not numeric but " + str(control.type))
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Final expression for for cycle is not numeric but " + str(exp.type))
         else:
-            raise Exception("Operand stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def end_for(self):
         """
@@ -481,7 +481,7 @@ class SemanticActions:
             self.quad_list.append(Quadruple(Operator('goto'), None, None, ret))
             self.finish_jump(end, len(self.quad_list))
         else:
-            raise Exception("Stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def finish_jump(self, quad, jump):
         """
@@ -524,7 +524,7 @@ class SemanticActions:
         # Verify that the function exists into the DirFunc
         fun = self.get_fun(fun_name)
         if needs_return and fun.return_type == ReturnType.VOID:
-            raise Exception('Semantic Error: ' + fun.name + " is void. Return needed.")
+            raise Exception('Semantic Error: ' + fun.name + " is void but a return is requested.")
         # Verify coherence in number of parameters
         if len(fun.param_table) != len(arg_list):
             raise Exception('Incorrect number of arguments in function call: ' + fun.name)
@@ -536,7 +536,7 @@ class SemanticActions:
             if param[1] == arg.type:
                 self.quad_list.append(Quadruple(Operator.PARAMETER, arg.address, None, param[0]))
             else:
-                raise Exception('Type mismatch, expected: ' + param[1] + " got: " + arg.type)
+                raise TypeError('Type mismatch: ' + str(fun_name) + ' requires argument to be ' + str(param[1]) + " but got " + str(arg.type))
         # Generate action GOSUB
         self.quad_list.append(Quadruple(Operator.GOSUB, fun.name, None, fun.start_addr))
 
@@ -561,9 +561,9 @@ class SemanticActions:
             if result_type != "error":
                 self.quad_list.append(Quadruple(Operator.ASSIGN, return_var.address, None, fun_var.address))
             else:
-                raise Exception("Type mismatch")
+                raise TypeError("Type mismatch: Function " + str(self.current_scope) + " returns " + str(fun_var.type) + " but got " + str(return_var.type))
         else:
-            raise Exception("Operation stack error")
+            raise Exception("Operation stack error: Not enough operands")
 
     def array_usage(self, var_id, dims):
         """
@@ -594,9 +594,9 @@ class SemanticActions:
                             Quadruple(Operator.ASSIGNPTR, temp_addr, '', pointer_addr))
                         self.operands_stack.append(pointer_id)
                     else:
-                        raise Exception("Index type error")
+                        raise Exception("Index type error: Needed var type INT")
                 else:
-                    raise Exception("Operation stack error")
+                    raise Exception("Operation stack error: Not enough operands")
             else:
                 raise Exception("Var " + str(var_id) + " is not an array of 1 dimension")
         else:
@@ -637,9 +637,9 @@ class SemanticActions:
                         self.quad_list.append(Quadruple(Operator.ASSIGNPTR, temp3_addr, '', pointer_addr))
                         self.operands_stack.append(pointer_id)
                     else:
-                        raise Exception("Index type error")
+                        raise Exception("Index type error: Needed var type INT")
                 else:
-                    raise Exception("Operation stack error")
+                    raise Exception("Operation stack error: Not enough operands")
             else:
                 raise Exception("Var " + str(var_id) + " is not an array of 2 dimensions")
 
