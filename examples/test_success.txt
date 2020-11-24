@@ -2,10 +2,13 @@ program find_factorial
 
 var num: int
 var factorial: int
+var num2: char
 
 main() {
     num = 10
     factorial = 1
     write("Factorial =")
     write("factorial")
+
+    factorial = num + num2
 }
